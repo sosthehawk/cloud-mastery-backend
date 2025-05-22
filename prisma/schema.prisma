@@ -1,0 +1,73 @@
+// This is your modified Prisma schema file
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "mysql"
+  url       = env("MYSQL_PRISMA_URL") // uses connection pooling
+}
+
+model customer {
+  id          String   @id @default(uuid()) @db.VarChar(255)
+  firstName   String   @db.VarChar(255)
+  lastName    String   @db.VarChar(255)
+  email       String   @unique @db.VarChar(255)
+  phone String   @db.VarChar(255)
+  address     String?  @db.VarChar(255)
+  city     String?  @db.VarChar(255)
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamp(6)
+  updatedAt   DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamp(6)
+
+  @@index([firstName, lastName, email])
+  @@map("customers")
+}
+
+model product {
+  id          String   @id @default(uuid()) @db.VarChar(255)
+  name   String   @db.VarChar(255)
+  description    String?   @db.VarChar(255)
+  category String   @db.VarChar(255)
+  unitCost        Decimal @db.Decimal(10, 2)
+  quantity Int    @default(0)
+  totalCost        Decimal @db.Decimal(10, 2)
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamp(6)
+  updatedAt   DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamp(6)
+
+  @@index([category])
+  @@map("products")
+}
+
+model order {
+  id          String   @id @default(uuid()) @db.VarChar(255)
+  customerId   String   @map("customer_id") @db.VarChar(255)
+  orderNumber  String?   @db.VarChar(255)
+  orderAmount   Decimal @db.Decimal(10, 2)
+  orderDate   DateTime
+  description String?  @db.Text
+  paymentMethod String   @db.VarChar(255)
+  shippingAddress String  @db.VarChar(255)
+  status      String   @default("pending") @db.VarChar(255)
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamp(6)
+  updatedAt   DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamp(6)
+  items       order_detail[]
+
+  @@map("orders")
+}
+
+model order_detail {
+  id          String   @id @default(uuid()) @db.VarChar(255)
+  orderId   String   @map("order_id") @db.VarChar(255)
+  customerId   String   @map("customer_id") @db.VarChar(255)
+  productId   String   @map("product_id") @db.VarChar(255)
+   unitCost        Decimal @db.Decimal(10, 2)
+  quantity Int    @default(0)
+  totalCost        Decimal @db.Decimal(10, 2)
+
+  order        order     @relation(fields: [orderId], references: [id])
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamp(6)
+  updatedAt   DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamp(6)
+
+  @@map("order_details")
+}

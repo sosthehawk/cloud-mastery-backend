@@ -1,0 +1,99 @@
+# nestjs-backend-service
+
+Backend service built with NestJs 10. Includes unit tests to ensure robustness and efficiency.
+
+## Installation
+
+1. Clone the repository and then install required dependencies
+
+```
+git clone git@github.com:Pawa-IT-Solutions/nestjs-backend-service.git
+```
+
+2. Navigate to the target directory
+
+```
+cd nestjs-backend-service
+```
+
+3. Install dependencies
+
+```bash
+$ npm install
+```
+
+4. Configure environment variables
+
+```
+cp .env.example .env
+```
+
+```
+MYSQL_PRISMA_URL="mysql://username:password@localhost:3306/database_name?sslmode=require"
+MYSQL_URL_NO_SSL="mysql://username:password@localhost:3306/database_name"
+
+MYSQL_URL_NON_POOLING="mysql://username:password@localhost:3306/database_name"
+
+JWT_SECRET=test
+JWT_EXPIRES_IN=1D
+TOKEN_TYPE=Bearer
+
+JWT_REFRESH_SECRET=test
+JWT_REFRESH_EXPIRES_IN=7D
+```
+
+5. Run database seed
+
+```
+npm run seed
+```
+
+## Apply migrations
+1. Generate Prisma Client
+```
+npx prisma generate
+```
+4. Create and Apply Migration
+```
+npx prisma migrate dev --name init
+```
+
+This will create a migration file based on your schema and apply the migration to your database
+
+## Running the app
+
+```bash
+# development
+$ npm run start
+
+# watch mode
+$ npm run start:dev
+
+# production mode
+$ npm run start:prod
+```
+
+### Endpoints
+
+1. Get Customers
+
+```
+curl -X GET http://localhost:PORT/api/v1/customers
+```
+
+2. Get Products
+
+```
+curl -X GET http://localhost:PORT/api/v1/products
+```
+
+3. Get Orders
+
+```
+curl -X GET http://localhost:PORT/api/v1/orders
+```
+## Test
+
+```bash
+# unit tests
+$ npm run test
