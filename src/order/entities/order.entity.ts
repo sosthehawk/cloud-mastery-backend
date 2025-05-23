@@ -6,7 +6,7 @@ export class Order {
   orderDate: Date;
   paymentMethod: string; // cash, bank
   shippingAddress: string;
-  status: string; //pending, completed
+  status?: string; //pending, completed
   createdAt: Date;
   updatedAt: Date;
 }

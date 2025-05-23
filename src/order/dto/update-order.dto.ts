@@ -20,6 +20,9 @@ export class UpdateOrderDto {
   @IsNotEmpty()
   shippingAddress: string;
 
+  @IsOptional()
+  status?: string; //pending, completed
+
   @IsNotEmpty()
   @IsArray()
   @ValidateNested({ each: true })
@@ -41,4 +44,6 @@ export class UpdateOrderItemDto {
   @IsNumber()
   @Min(0)
   unitCost: number;
+
+
 }

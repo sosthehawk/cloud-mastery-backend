@@ -53,7 +53,7 @@ npm run seed
 ```
 npx prisma generate
 ```
-4. Create and Apply Migration
+2. Create and Apply Migration
 ```
 npx prisma migrate dev --name init
 ```
