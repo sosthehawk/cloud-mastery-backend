@@ -6,14 +6,7 @@ steps:
       - '-c'
       - |
         cat <<EOF > .env
-        DATABASE_URL=${_DATABASE_URL}
         MYSQL_PRISMA_URL=${_MYSQL_PRISMA_URL}
-        MYSQL_URL_NON_POOLING=${_MYSQL_URL_NON_POOLING}
-        JWT_SECRET=${_JWT_SECRET}
-        JWT_EXPIRES_IN=${_JWT_EXPIRES_IN}
-        JWT_REFRESH_SECRET=${_JWT_REFRESH_SECRET}
-        JWT_REFRESH_EXPIRES_IN=${_JWT_REFRESH_EXPIRES_IN}
-        TOKEN_TYPE=${_TOKEN_TYPE}
         EOF
 
   # Remove any trailing whitespace and empty lines
@@ -56,14 +49,7 @@ steps:
       - '500'
       - '--set-env-vars'
       - |
-        DATABASE_URL=${_DATABASE_URL}
         MYSQL_PRISMA_URL=${_MYSQL_PRISMA_URL}
-        MYSQL_URL_NON_POOLING=${_MYSQL_URL_NON_POOLING}
-        JWT_SECRET=${_JWT_SECRET}
-        JWT_EXPIRES_IN=${_JWT_EXPIRES_IN}
-        JWT_REFRESH_SECRET=${_JWT_REFRESH_SECRET}
-        JWT_REFRESH_EXPIRES_IN=${_JWT_REFRESH_EXPIRES_IN}
-        TOKEN_TYPE=${_TOKEN_TYPE}
 
-images:
-  - 'gcr.io/$PROJECT_ID/$REPO_NAME:$COMMIT_SHA'
+options:
+  logging: CLOUD_LOGGING_ONLY

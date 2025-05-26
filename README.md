@@ -30,16 +30,6 @@ cp .env.example .env
 
 ```
 MYSQL_PRISMA_URL="mysql://username:password@localhost:3306/database_name?sslmode=require"
-MYSQL_URL_NO_SSL="mysql://username:password@localhost:3306/database_name"
-
-MYSQL_URL_NON_POOLING="mysql://username:password@localhost:3306/database_name"
-
-JWT_SECRET=test
-JWT_EXPIRES_IN=1D
-TOKEN_TYPE=Bearer
-
-JWT_REFRESH_SECRET=test
-JWT_REFRESH_EXPIRES_IN=7D
 ```
 
 5. Run database seed
