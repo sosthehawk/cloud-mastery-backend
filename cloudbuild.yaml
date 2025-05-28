@@ -66,19 +66,6 @@ steps:
       - "--set-env-vars"
       - "MYSQL_PRISMA_URL=${_MYSQL_PRISMA_URL}"
 
-  # Set IAM policy to allow public access
-  - id: "set-iam-policy"
-    name: "gcr.io/cloud-builders/gcloud"
-    entrypoint: "bash"
-    args:
-      - "-c"
-      - |
-        gcloud run services add-iam-policy-binding ${REPO_NAME} \
-          --region=${_REGION} \
-          --member=allUsers \
-          --role=roles/run.invoker \
-          --project=${PROJECT_ID} || echo "IAM policy may already be set"
-
 substitutions:
   _REGION: "us-central1"
 
