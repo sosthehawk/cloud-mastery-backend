@@ -22,6 +22,7 @@ export class CustomerService {
         email: createCustomerDto.email,
         phone: createCustomerDto.phone,
         address: createCustomerDto.address,
+        city: createCustomerDto.city,
       },
     });
     return customer;
@@ -63,7 +64,8 @@ export class CustomerService {
         lastName: updateCustomerDto.lastName,
         email: updateCustomerDto.email,
         phone: updateCustomerDto.phone,
-        address: updateCustomerDto.address, },
+        address: updateCustomerDto.address,
+        city: updateCustomerDto.city},
     });
     return updatedData;
   }
