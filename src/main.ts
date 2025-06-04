@@ -4,7 +4,7 @@ import { ValidationPipe, VersioningType } from '@nestjs/common';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  const port = process.env.PORT || 3000;
+  const port = process.env.PORT || 5000; 
 
   // Set a global prefix
   app.setGlobalPrefix('api');
