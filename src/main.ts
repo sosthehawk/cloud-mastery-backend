@@ -23,7 +23,6 @@ async function bootstrap() {
   const corsOptions: CorsOptions = {
     origin: ['*'],
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
-    credentials: true, // Allow cookies to be sent with the request
   };
 
   app.enableCors(corsOptions);
