@@ -19,9 +19,10 @@ async function bootstrap() {
 
   // Configure CORS options
   app.enableCors({
-    origin: '*', // This is fine with credentials: false
+    origin: '*', // Allows all origins
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-    allowedHeaders:"*", // Or be more specific: 'Content-Type, Accept, Authorization'
+    allowedHeaders: '*', // Or be specific: 'Content-Type, Accept'
+    credentials: false, // Explicitly false
   });
 
   await app.listen(port);
