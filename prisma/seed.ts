@@ -5,6 +5,17 @@ const prisma = new PrismaClient();
 async function main() {
   console.log('Starting seed...');
 
+  // Check if data already exists
+  const existingCustomersCount = await prisma.customer.count();
+  const existingProductsCount = await prisma.product.count();
+  const existingOrdersCount = await prisma.order.count();
+
+  if (existingCustomersCount > 0 || existingProductsCount > 0 || existingOrdersCount > 0) {
+    console.log('Database already contains data, skipping seed...');
+    console.log(`Found ${existingCustomersCount} customers, ${existingProductsCount} products, ${existingOrdersCount} orders`);
+    return;
+  }
+
   // Create 10 customers
   const customers = [
     {
@@ -92,8 +103,23 @@ async function main() {
   console.log('Creating customers...');
   const createdCustomers = [];
   for (const customer of customers) {
-    const createdCustomer = await prisma.customer.create({ data: customer });
-    createdCustomers.push(createdCustomer);
+    try {
+      const createdCustomer = await prisma.customer.create({ data: customer });
+      createdCustomers.push(createdCustomer);
+    } catch (error) {
+      // If customer already exists (e.g., unique constraint on email), skip
+      if (error.code === 'P2002') {
+        console.log(`Customer with email ${customer.email} already exists, skipping...`);
+        const existingCustomer = await prisma.customer.findUnique({
+          where: { email: customer.email }
+        });
+        if (existingCustomer) {
+          createdCustomers.push(existingCustomer);
+        }
+      } else {
+        throw error;
+      }
+    }
   }
 
   // Create 10 products
@@ -183,74 +209,117 @@ async function main() {
   console.log('Creating products...');
   const createdProducts = [];
   for (const product of products) {
-    const createdProduct = await prisma.product.create({ data: product });
-    createdProducts.push(createdProduct);
-  }
-
-  // Create 10 orders with order details
-  console.log('Creating orders with details...');
-  const paymentMethods = ['VISA', 'MASTERCARD', 'PAYPAL', 'CASH', 'BANK_TRANSFER'];
-  const statuses = ['pending', 'confirmed', 'shipped', 'delivered', 'cancelled'];
-
-  for (let i = 0; i < 10; i++) {
-    const customer = createdCustomers[i];
-    const orderDate = new Date();
-    orderDate.setDate(orderDate.getDate() - Math.floor(Math.random() * 30)); // Random date within last 30 days
-
-    // Randomly select 1-3 products for this order
-    const numberOfItems = Math.floor(Math.random() * 3) + 1;
-    const selectedProducts = [];
-    const usedIndices = new Set();
-
-    while (selectedProducts.length < numberOfItems) {
-      const randomIndex = Math.floor(Math.random() * createdProducts.length);
-      if (!usedIndices.has(randomIndex)) {
-        usedIndices.add(randomIndex);
-        selectedProducts.push(createdProducts[randomIndex]);
+    try {
+      const createdProduct = await prisma.product.create({ data: product });
+      createdProducts.push(createdProduct);
+    } catch (error) {
+      // If product already exists (e.g., unique constraint on name), skip
+      if (error.code === 'P2002') {
+        console.log(`Product ${product.name} already exists, skipping...`);
+        const existingProduct = await prisma.product.findFirst({
+          where: { name: product.name }
+        });
+        if (existingProduct) {
+          createdProducts.push(existingProduct);
+        }
+      } else {
+        throw error;
       }
     }
+  }
 
-    // Calculate order total
-    let orderTotal = 0;
-    const orderItems = selectedProducts.map(product => {
-      const quantity = Math.floor(Math.random() * 5) + 1; // 1-5 quantity
-      const itemTotal = Number(product.unitCost) * quantity;
-      orderTotal += itemTotal;
+  // Only create orders if we have customers and products
+  if (createdCustomers.length > 0 && createdProducts.length > 0) {
+    console.log('Creating orders with details...');
+    const paymentMethods = ['VISA', 'MASTERCARD', 'PAYPAL', 'CASH', 'BANK_TRANSFER'];
+    const statuses = ['pending', 'confirmed', 'shipped', 'delivered', 'cancelled'];
 
-      return {
-        customerId: customer.id,
-        productId: product.id,
-        unitCost: product.unitCost,
-        quantity: quantity,
-        totalCost: itemTotal,
-      };
-    });
+    for (let i = 0; i < Math.min(10, createdCustomers.length); i++) {
+      const customer = createdCustomers[i];
+      const orderDate = new Date();
+      orderDate.setDate(orderDate.getDate() - Math.floor(Math.random() * 30)); // Random date within last 30 days
 
-    // Create order with items
-    await prisma.order.create({
-      data: {
-        customerId: customer.id,
-        orderNumber: `ORD-${Date.now()}-${i + 1}`,
-        orderAmount: orderTotal,
-        orderDate: orderDate,
-        description: `Order for ${customer.firstName} ${customer.lastName}`,
-        paymentMethod: paymentMethods[Math.floor(Math.random() * paymentMethods.length)],
-        shippingAddress: `${customer.address}, ${customer.city}`,
-        status: statuses[Math.floor(Math.random() * statuses.length)],
-        items: {
-          create: orderItems
-        }
-      },
-      include: {
-        items: true
+      const orderNumber = `ORD-${Date.now()}-${i + 1}`;
+      
+      // Check if order already exists
+      const existingOrder = await prisma.order.findFirst({
+        where: { orderNumber }
+      });
+
+      if (existingOrder) {
+        console.log(`Order ${orderNumber} already exists, skipping...`);
+        continue;
       }
-    });
+
+      // Randomly select 1-3 products for this order
+      const numberOfItems = Math.floor(Math.random() * 3) + 1;
+      const selectedProducts = [];
+      const usedIndices = new Set();
+
+      while (selectedProducts.length < numberOfItems && selectedProducts.length < createdProducts.length) {
+        const randomIndex = Math.floor(Math.random() * createdProducts.length);
+        if (!usedIndices.has(randomIndex)) {
+          usedIndices.add(randomIndex);
+          selectedProducts.push(createdProducts[randomIndex]);
+        }
+      }
+
+      // Calculate order total
+      let orderTotal = 0;
+      const orderItems = selectedProducts.map(product => {
+        const quantity = Math.floor(Math.random() * 5) + 1; // 1-5 quantity
+        const itemTotal = Number(product.unitCost) * quantity;
+        orderTotal += itemTotal;
+
+        return {
+          customerId: customer.id,
+          productId: product.id,
+          unitCost: product.unitCost,
+          quantity: quantity,
+          totalCost: itemTotal,
+        };
+      });
+
+      // Create order with items
+      try {
+        await prisma.order.create({
+          data: {
+            customerId: customer.id,
+            orderNumber: orderNumber,
+            orderAmount: orderTotal,
+            orderDate: orderDate,
+            description: `Order for ${customer.firstName} ${customer.lastName}`,
+            paymentMethod: paymentMethods[Math.floor(Math.random() * paymentMethods.length)],
+            shippingAddress: `${customer.address}, ${customer.city}`,
+            status: statuses[Math.floor(Math.random() * statuses.length)],
+            items: {
+              create: orderItems
+            }
+          },
+          include: {
+            items: true
+          }
+        });
+      } catch (error) {
+        console.log(`Error creating order for customer ${customer.email}:`, error.message);
+      }
+    }
   }
 
   console.log('Seed completed successfully!');
-  console.log(`Created ${createdCustomers.length} customers`);
-  console.log(`Created ${createdProducts.length} products`);
-  console.log('Created 10 orders with their details');
+  console.log(`Created/found ${createdCustomers.length} customers`);
+  console.log(`Created/found ${createdProducts.length} products`);
+  console.log('Orders creation attempted');
+
+  // Final count
+  const finalCustomersCount = await prisma.customer.count();
+  const finalProductsCount = await prisma.product.count();
+  const finalOrdersCount = await prisma.order.count();
+  
+  console.log(`Final database state:`);
+  console.log(`- Customers: ${finalCustomersCount}`);
+  console.log(`- Products: ${finalProductsCount}`);
+  console.log(`- Orders: ${finalOrdersCount}`);
 }
 
 main()
