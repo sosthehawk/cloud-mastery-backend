@@ -21,7 +21,7 @@ async function bootstrap() {
 
   // Configure CORS options
   const corsOptions: CorsOptions = {
-    origin: ['*'],
+    origin: true,
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
   };
 
