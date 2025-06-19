@@ -5,7 +5,6 @@ const prisma = new PrismaClient();
 
 async function main() {
   console.log('Starting seed with 500 records each...');
-
   // Check if data already exists
   const existingCustomersCount = await prisma.customer.count();
   const existingProductsCount = await prisma.product.count();
