@@ -17,14 +17,7 @@ async function bootstrap() {
     }),
   );
 
-  // Configure CORS options
-  app.enableCors({
-    origin: '*', // Allows all origins
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-    allowedHeaders: '*', // Or be specific: 'Content-Type, Accept'
-    credentials: false, // Explicitly false
-  });
-
+  app.enableCors();
   await app.listen(port);
   console.log(`Application is running on: ${await app.getUrl()}`);
 }
